@@ -1,0 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/sh
+[ -z "${PREFIX}" ] && export PREFIX="/data/data/com.termux/files/usr"
+
+echo "[*] Connecting to the QEMU monitor... "
+exec socat - "UNIX-CONNECT:${PREFIX}/tmp/qemu-mon"

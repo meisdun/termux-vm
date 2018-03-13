@@ -1,0 +1,7 @@
+/*.deb
+/*.deb.sig
+/*.deb.sh
+/*.deb.sh.sig
+/TODO
+/TODO.txt
+/package-files/DEBIAN/control

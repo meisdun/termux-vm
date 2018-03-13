@@ -1,0 +1,21 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+unset LD_LIBRARY_PATH
+unset LD_PRELOAD
+
+EXE_NAME=$(basename "${0}")
+
+if [ "${EXE_NAME}" = "android-exe" ]; then
+    echo
+    echo "This is a wrapper for programs in /system/bin."
+    echo "It shouldn't be called directly."
+    echo
+    exit 1
+fi
+
+if [ ! -e "/system/bin/${EXE_NAME}" ]; then
+    echo "'${EXE_NAME}' is not available in your OS."
+    exit 1
+fi
+
+exec "/system/bin/${EXE_NAME}" "$@"

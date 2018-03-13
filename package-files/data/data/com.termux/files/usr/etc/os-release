@@ -1,0 +1,5 @@
+NAME="Termux VM"
+PRETTY_NAME="Termux environment that powered by QEMU"
+ID=termux-vm
+ID_LIKE=termux-vm
+ANSI_COLOR="0;36"

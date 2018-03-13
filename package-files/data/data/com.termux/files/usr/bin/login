@@ -1,0 +1,162 @@
+#!/data/data/com.termux/files/usr/bin/bash
+##
+##  Login to the Termux Environment
+##
+##  Leonid Plyushch (C) 2018
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License for more details.
+##
+##  You should have received a copy of the GNU General Public License
+##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+
+## Prepare environment
+unset LD_PRELOAD
+[ -z "${PREFIX}" ] && export PREFIX="/data/data/com.termux/files/usr"
+
+QEMU_NPROC="2"
+QEMU_RAM="1024"
+QEMU_SSH_PORT="8222"
+
+ARCHLINUX_BASE_IMAGE="${PREFIX}/share/qemu/os-images/archlinux-base.qcow2"
+ARCHLINUX_SNAP_IMAGE="${PREFIX}/var/lib/qemu/archlinux.snap.qcow2"
+QEMU_PIDFILE="${PREFIX}/var/run/qemu.pid"
+
+##
+##  Create a snapshot of HDD where all changes will be written.
+##
+mksnapimage()
+{
+    if qemu-img create -q -f qcow2 -b "${ARCHLINUX_BASE_IMAGE}" "${ARCHLINUX_SNAP_IMAGE}" > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+##
+##  Start QEMU VM.
+##
+start_qemu_session()
+{
+    echo -ne '\e]0;QEMU\a'
+    exec qemu-system-x86_64 -smp "${QEMU_NPROC}" \
+                            -m "${QEMU_RAM}" \
+                            -vga none \
+                            -nographic \
+                            -pidfile "${QEMU_PIDFILE}" \
+                            -drive file="${ARCHLINUX_SNAP_IMAGE}",if=virtio \
+                            -device virtio-net-pci,netdev=qemunet0 \
+                            -netdev "user,id=qemunet0,hostfwd=tcp::${QEMU_SSH_PORT}-:22" \
+                            -parallel none \
+                            -device virtio-serial \
+                            -chardev tty,id=console0,mux=off,path="$(tty)" \
+                            -device virtconsole,chardev=console0 \
+                            -monitor "unix:${PREFIX}/tmp/qemu-mon,server,nowait"
+}
+
+##
+##  Connect to the QEMU via SSH.
+##
+connect_to_qemu()
+{
+    echo "[*] Waiting for SSH port..."
+    while true; do
+        if [[ $(echo "porttest" | nc 127.0.0.1 "${QEMU_SSH_PORT}" 2>/dev/null | grep SSH | head -c3) = "SSH" ]]; then
+            echo "[*] Connecting to 127.0.0.1:${QEMU_SSH_PORT}..."
+            exec ssh -o UserKnownHostsFile=/dev/null \
+                     -o StrictHostKeyChecking=no \
+                     -p "${QEMU_SSH_PORT}" \
+                     -q \
+                     admin@localhost
+        else
+            sleep 1
+        fi
+    done
+}
+
+if [ -f "${PREFIX}/etc/login_overrides.sh" ] && [ -r "${PREFIX}/etc/login_overrides.sh" ]; then
+    . "${PREFIX}/etc/login_overrides.sh"
+fi
+
+##
+##  Start bash session. This should be used for troubleshooting
+##  or configuring the host environment.
+##
+start_host_session()
+{
+    tput el1
+    echo -e "\r[*] Starting host session..."
+    exec bash -l
+}
+
+## Start host session on sigint (CTRL-C)
+trap start_host_session INT
+
+## Do nothing on signals TERM & QUIT
+trap '' QUIT TERM
+
+if [ ! -e "${ARCHLINUX_SNAP_IMAGE}" ]; then
+    echo -n "[*] Creating a snapshot image... "
+    if mksnapimage; then
+        echo "ok"
+    else
+        echo "fail"
+        start_host_session
+    fi
+else
+    if [ ! -f "${ARCHLINUX_SNAP_IMAGE}" ]; then
+        rm -rf "${ARCHLINUX_SNAP_IMAGE}" > /dev/null 2>&1
+        echo -n "[*] Creating a snapshot image... "
+        if mksnapimage; then
+            echo "ok"
+        else
+            echo "fail"
+            start_host_session
+        fi
+    fi
+fi
+
+PID=$(cat "${QEMU_PIDFILE}" 2>/dev/null)
+if [ -z "${PID}" ] || [ ! -d "/proc/${PID}" ]; then
+    echo "[*] QEMU VM will be started in 5 seconds."
+    echo
+    echo "    Press CTRL-C to run host session instead."
+    echo
+
+    countdown=5
+    while [ ${countdown} -ge 0 ]; do
+        echo -ne "\e[2K\r    Waiting ${countdown} seconds..."
+        sleep 1 || start_host_session
+        countdown=$((countdown - 1))
+    done
+    echo
+    start_qemu_session
+else
+    echo "[*] SSH connection to the VM will be opened"
+    echo "    in 5 seconds."
+    echo
+    echo "    Press CTRL-C to run host session instead."
+    echo
+
+    countdown=5
+    while [ ${countdown} -ge 0 ]; do
+        echo -ne "\e[2K\r    Waiting ${countdown} seconds..."
+        sleep 1 || start_host_session
+        countdown=$((countdown - 1))
+    done
+    echo
+    echo
+
+    connect_to_qemu
+fi
+
+exit 0

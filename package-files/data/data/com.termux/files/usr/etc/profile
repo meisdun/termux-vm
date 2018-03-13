@@ -1,0 +1,53 @@
+###############################################################
+##
+##  Profile for sh/bash
+##
+###############################################################
+
+##
+## Set the strict file mode creation mask so
+## only user with Termux UID can access them.
+##
+umask 077
+
+##
+## A path to the Termux prefixed environment
+##
+## Usually it should be set by the application,
+## but we need to make sure that it exists and
+## pointing to the right place.
+##
+export PREFIX="/data/data/com.termux/files/usr"
+
+##
+## A path to the home directory
+##
+export HOME="/data/data/com.termux/files/home"
+
+##
+## Basic environment variables
+##
+## Do not touch if you are don't know what you are
+## doing.
+##
+export EDITOR="${PREFIX}/bin/nano"
+export PATH="${PREFIX}/bin"
+export TERMINFO="${PREFIX}/share/terminfo"
+export TMPDIR="${PREFIX}/tmp"
+
+##
+## Don't use LD_LIBRARY_PATH
+##
+## Normally, programs in TermuxVM depend only on
+## Android OS libraries such as libc or liblog.
+##
+unset LD_LIBRARY_PATH
+
+##
+## Load bashrc
+##
+if [ -n "${BASH}" ]; then
+    if [ -r "${PREFIX}/etc/bash.bashrc" ]; then
+        . "${PREFIX}/etc/bash.bashrc"
+    fi
+fi
