@@ -9,6 +9,7 @@ data/data/com.termux/files/usr/etc/ssh/ssh_config
 data/data/com.termux/files/usr/etc/ssh/sshd_config
 data/data/com.termux/files/usr/etc/tls/cert.pem
 data/data/com.termux/files/usr/etc/tls/openssl.cnf
+data/data/com.termux/files/usr/etc/tmux.conf
 data/data/com.termux/files/usr/etc/wgetrc
 data/data/com.termux/files/usr/share/nano/asm.nanorc
 data/data/com.termux/files/usr/share/nano/autoconf.nanorc

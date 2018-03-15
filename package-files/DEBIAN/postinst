@@ -1,4 +1,0 @@
-#!/data/data/com.termux/files/usr/bin/sh
-umask 077
-makewhatis > /dev/null 2>&1
-exit 0

@@ -7,7 +7,7 @@
 
 PACKAGE_NAME="termux-vm"
 PACKAGE_ARCHITECTURE="aarch64"
-PACKAGE_VERSION="2.0"
+PACKAGE_VERSION="2.1"
 PACKAGE_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com> @xeffyr"
 PACKAGE_DESCRIPTION="Termux environment that powered by QEMU"
 

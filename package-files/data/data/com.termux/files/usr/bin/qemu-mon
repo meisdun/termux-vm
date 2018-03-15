@@ -1,5 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/sh
-[ -z "${PREFIX}" ] && export PREFIX="/data/data/com.termux/files/usr"
+[ -z "${TMPDIR}" ] && export TMPDIR="/data/data/com.termux/files/usr/tmp"
 
-echo "[*] Connecting to the QEMU monitor... "
-exec socat - "UNIX-CONNECT:${PREFIX}/tmp/qemu-mon"
+if [ -S "${TMPDIR}/qemu-mon" ]; then
+    echo "[*] Connecting to the QEMU monitor... "
+    exec socat - "UNIX-CONNECT:${PREFIX}/tmp/qemu-mon"
+else
+    echo "[*] QEMU Monitor socket is not found."
+    echo "    Possible that QEMU session is not running."
+    exit 1
+fi

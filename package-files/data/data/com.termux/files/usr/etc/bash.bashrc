@@ -66,23 +66,35 @@ if shopt -q login_shell && [ -z "${SSH_TTY}" ]; then
     echo
     echo " Welcome to the Termux-VM host environment"
     echo
-    echo " This is a busybox-based that has a small amount of tools"
-    echo " which could be useful for advanced configuration or"
-    echo " troubleshooting of the Termux VM."
+    echo " This is a busybox-based that has a small amount of"
+    echo " tools which could be useful for troubleshooting or"
+    echo " advanced configuration of the Termux VM."
     echo
     echo " Here is some tools which you can use:"
     echo
     echo "  * hexedit           - binary editor"
-    echo "  * htop              - process monitor"
-    echo "  * nano              - text/code editor"
-    echo "  * qemu-img          - for managing QEMU disk images"
-    echo "  * qemu-mon          - for connecting to the QEMU monitor"
-    echo "  * shellcheck        - static analyser for shell scripts"
-    echo "  * sshd              - OpenSSH server"
-    echo "  * termux-container  - for using the original Termux environment"
-    echo "  * unowned-files     - find files that not owned by any package"
     echo
-    echo " If you want to change behaviour of login script,"
-    echo " you need to edit file '\${PREFIX}/etc/login_overrides.sh'."
+    echo "  * htop              - process monitor"
+    echo
+    echo "  * nano              - text/code editor"
+    echo
+    echo "  * qemu-img          - for managing QEMU disk images"
+    echo
+    echo "  * qemu-mon          - for connecting to the QEMU"
+    echo "                        monitor"
+    echo
+    echo "  * shellcheck        - static analyser for the shell"
+    echo "                        scripts"
+    echo
+    echo "  * sshd              - OpenSSH server"
+    echo
+    echo "  * termux-container  - for using the original Termux"
+    echo "                        environment"
+    echo
+    echo "  * unowned-files     - find files that not owned by"
+    echo "                        any *.deb package"
+    echo
+    echo " If you want to change behaviour of login script, you"
+    echo " need to edit file '\${PREFIX}/etc/login_overrides.sh'."
     echo
 fi
