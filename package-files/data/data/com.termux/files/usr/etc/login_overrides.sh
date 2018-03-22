@@ -6,10 +6,10 @@
 ##############################################################################
 
 ## How many CPUs VM will have.
-QEMU_NPROC="2"
+QEMU_NPROC="1"
 
 ## How much RAM VM will have.
-QEMU_RAM="1024"
+QEMU_RAM="768"
 
 ## To which port SSH will be forwarded from the VM.
 QEMU_SSH_PORT="8222"
@@ -41,19 +41,20 @@ mksnapimage()
 start_qemu_session()
 {
     echo -ne '\e]0;QEMU\a'
-    exec qemu-system-x86_64 -smp "${QEMU_NPROC}" \
-                            -m "${QEMU_RAM}" \
+    exec qemu-system-x86_64 -pidfile "${QEMU_PIDFILE}" \
                             -vga none \
                             -nographic \
-                            -pidfile "${QEMU_PIDFILE}" \
+                            -smp "${QEMU_NPROC}" \
+                            -m "${QEMU_RAM}" \
+                            -tb-size "$((64 * 1048576))" \
                             -drive file="${ARCHLINUX_SNAP_IMAGE}",if=virtio \
-                            -device virtio-net-pci,netdev=qemunet0 \
-                            -netdev "user,id=qemunet0,hostfwd=tcp::${QEMU_SSH_PORT}-:22" \
-                            -parallel none \
-                            -device virtio-serial \
+                            -netdev user,id=vmnic,hostfwd="tcp::${QEMU_SSH_PORT}-:22" \
+                            -device virtio-net,netdev=vmnic \
                             -chardev tty,id=console0,mux=off,path="$(tty)" \
+                            -device virtio-serial \
                             -device virtconsole,chardev=console0 \
-                            -monitor "unix:${PREFIX}/tmp/qemu-mon,server,nowait"
+                            -monitor "unix:${PREFIX}/tmp/qemu-mon",server,nowait \
+                            -parallel none
 }
 
 ##
